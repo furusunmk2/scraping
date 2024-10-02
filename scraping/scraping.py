@@ -1,51 +1,47 @@
 import requests
 from bs4 import BeautifulSoup
 
-
 url = "https://job.mynavi.jp/25/pc/corpinfo/displayEmployment/index?corpId=215524&recruitingCourseId=108859"
-html = requests.get(url)
-soup = BeautifulSoup(html.content, "html.parser") 
 
-#ここでwebページを取得する。
+# webページを取得する
 response = requests.get(url)
-
-#文字化け防止コード
 response.encoding = response.apparent_encoding
 
-#取得した文字列データを出力する。
+# BeautifulSoupで解析する
+soup = BeautifulSoup(response.content, "html.parser")
+
+# データを格納するリスト
+graduate = []
+salary = []
+basic = []
+allowance = []
+
+# 会社名を取得
 company_mod = soup.find("title").text
-company = company_mod.replace("の採用データ | マイナビ2025","")
-print(company)
+company = company_mod.replace("の採用データ | マイナビ2025", "")
+print("会社名:", company)
 
-salary_mod = soup.find(class_="courseName").text
-salary = salary_mod
-print(salary)
+# 各コースの情報を取得
+for tmp in soup.find_all(class_="courseRow"):
+    try:
+        # 各要素を分割
+        a, s, d, f = tmp.text.split()
+        graduate.append(a)
+        salary.append(s)
+        basic.append(d)
+        allowance.append(f)
+    except ValueError:
+        print("データを分割できませんでした:", tmp.text)
+for i in range(4):
+    print(graduate[i])
+    print("支給額:" + salary[i])
+    print("基本月額:" + basic[i])
+    print("諸手当（一律）／月:" + allowance[i])
 
-for graduate in soup.find_all(class_="courseRow"):
-    print(graduate.text)
-    # for j in soup.find_all(class_="courseData"):
-    #     print(j.text)
-# print(response.text)
 
+# 結果をファイルに書き込む
 filename = "download.txt"
-f = open(filename, mode = "w")
-f.write(response.text)
-f.close()
+with open(filename, mode="w", encoding="utf-8") as f:  # コンテキストマネージャを使用
+    f.write(response.text)
 
-
-
-
-    # <tr class="courseRow">
-    #     <th class="courseName">
-    #             <p>大学（通信・電気電子・情報システム系）</p>
-    #     </th>
-    #     <td class="courseData">
-    #             <p><span class="payTypeCd10">（月給）</span>215,000円</p>
-    #     </td>
-    #     <td class="courseData">
-    #             <p>205,000円</p>
-    #     </td>
-    #     <td class="courseData">
-    #             <p>10,000円</p>
-    #     </td>
-    # </tr>
+print(f"データが {filename} に保存されました。")
