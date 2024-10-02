@@ -21,10 +21,10 @@ salary_mod = soup.find(class_="courseName").text
 salary = salary_mod
 print(salary)
 
-for graduate in soup.find_all(class_="courseName"):
+for graduate in soup.find_all(class_="courseRow"):
     print(graduate.text)
-    for j in soup.find_all(class_="courseData"):
-        print(j.text)
+    # for j in soup.find_all(class_="courseData"):
+    #     print(j.text)
 # print(response.text)
 
 filename = "download.txt"
