@@ -13,13 +13,39 @@ response = requests.get(url)
 response.encoding = response.apparent_encoding
 
 #取得した文字列データを出力する。
-print(soup.find("title").text)
+company_mod = soup.find("title").text
+company = company_mod.replace("の採用データ | マイナビ2025","")
+print(company)
 
-company = soup.find("title", class_= "company")
-print(company.text)
+salary_mod = soup.find(class_="courseName").text
+salary = salary_mod
+print(salary)
+
+for i in soup.find_all(class_="courseName"):
+    print(i.text)
+    for j in soup.find_all(class_="courseData"):
+
 # print(response.text)
 
 filename = "download.txt"
 f = open(filename, mode = "w")
 f.write(response.text)
 f.close()
+
+
+
+
+    # <tr class="courseRow">
+    #     <th class="courseName">
+    #             <p>大学（通信・電気電子・情報システム系）</p>
+    #     </th>
+    #     <td class="courseData">
+    #             <p><span class="payTypeCd10">（月給）</span>215,000円</p>
+    #     </td>
+    #     <td class="courseData">
+    #             <p>205,000円</p>
+    #     </td>
+    #     <td class="courseData">
+    #             <p>10,000円</p>
+    #     </td>
+    # </tr>
