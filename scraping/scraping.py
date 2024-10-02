@@ -21,8 +21,8 @@ salary_mod = soup.find(class_="courseName").text
 salary = salary_mod
 print(salary)
 
-for i in soup.find_all(class_="courseName"):
-    print(i.text)
+for graduate in soup.find_all(class_="courseName"):
+    print(gra.text)
     for j in soup.find_all(class_="courseData"):
 
 # print(response.text)
