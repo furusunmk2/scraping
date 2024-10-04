@@ -19,7 +19,7 @@ for info in soup_corp_list.find_all('a', class_="js-add-examination-list-text"):
     corp_ids.append(info['target'])
 
 # 企業情報を取得する関数
-def get_company_info(corp_id):
+def get_company_info(corp_id, file):
     url = f"https://job.mynavi.jp/25/pc/search/corp{corp_id}/employment.html"
 
     # 企業ページを取得する
@@ -51,22 +51,18 @@ def get_company_info(corp_id):
             allowance.append(f)
         except ValueError:
             print("データを分割できませんでした:", tmp.text)
-            
-    for i in range(len(graduate)):
-        print(graduate[i])
-        print("支給額:" + salary[i])
-        print("基本月額:" + basic[i])
-        print("諸手当（一律）／月:" + allowance[i])
 
-    # 結果をファイルに書き込む
-    filename = f"{company}_data.txt"
-    with open(filename, mode="w", encoding="utf-8") as f:
-        f.write(f"会社名: {company}\n")
+    # 結果をファイルに追記する
+    with open(file, mode="a", encoding="utf-8") as f:
+        f.write(f"\n会社名: {company}\n")
         for i in range(len(graduate)):
             f.write(f"{graduate[i]}, 支給額: {salary[i]}, 基本月額: {basic[i]}, 諸手当（一律）／月: {allowance[i]}\n")
+    
+    print(f"データが {file} に追記されました。")
 
-    print(f"データが {filename} に保存されました。")
+# 結果を保存するファイル名
+output_file = "company_data.txt"
 
 # すべての企業IDについて情報を取得
 for corp_id in corp_ids:
-    get_company_info(corp_id)
+    get_company_info(corp_id, output_file)

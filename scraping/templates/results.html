@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スクレイピング結果 - Team 就活</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #e0eafc, #cfdef3);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+            text-align: center;
+            padding: 1.5em;
+            font-size: 1.5em;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        main {
+            padding: 2em;
+            text-align: center;
+        }
+
+        .company {
+            background-color: white;
+            padding: 1.5em;
+            margin-bottom: 1em;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s, transform 0.3s;
+        }
+
+        .company:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 0.5em;
+        }
+
+        p {
+            margin: 0.5em 0;
+        }
+
+        .spacer {
+            margin-bottom: 1em; /* 諸手当の下にスペースを追加 */
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 1em;
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1em;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    Team 就活 - スクレイピング結果
+</header>
+
+<main>
+    <h1>企業情報結果</h1>
+
+    <label for="sort">ソート順:</label>
+    <select id="sort" onchange="sortResults()">
+        <option value="company">会社名順</option>
+        <option value="salary">支給額順</option>
+        <option value="basic">基本月額順</option>
+    </select>
+
+    <div id="result-container">
+        {% for result in results %}
+            <div class="company" data-company="{{ result['company'] }}" data-salary="{{ result['salary'][0] }}" data-basic="{{ result['basic'][0] }}">
+                <h2>{{ result['company'] }}</h2>
+                {% for i in range(result['graduate']|length) %}
+                    <p><strong>卒業: </strong>{{ result['graduate'][i] }}</p>
+                    <p><strong>支給額: </strong>{{ result['salary'][i] }}</p>
+                    <p><strong>基本月額: </strong>{{ result['basic'][i] }}</p>
+                    <p class="spacer">
+                        <strong>諸手当: </strong>
+                        {{ result['allowance'][i] if result['allowance'][i] else "諸手当なし" }}
+                    </p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <a href="/">戻る</a>
+</main>
+
+<footer>
+    &copy; 2024 Team 就活
+</footer>
+
+<script>
+    function sortResults() {
+        const sortBy = document.getElementById('sort').value;
+        const container = document.getElementById('result-container');
+        const companies = Array.from(container.getElementsByClassName('company'));
+
+        companies.sort((a, b) => {
+            if (sortBy === 'company') {
+                return a.dataset.company.localeCompare(b.dataset.company);
+            } else if (sortBy === 'salary') {
+                return parseInt(b.dataset.salary.replace(/[^0-9]/g, '')) - parseInt(a.dataset.salary.replace(/[^0-9]/g, ''));
+            } else if (sortBy === 'basic') {
+                return parseInt(b.dataset.basic.replace(/[^0-9]/g, '')) - parseInt(a.dataset.basic.replace(/[^0-9]/g, ''));
+            }
+        });
+
+        container.innerHTML = '';
+        companies.forEach(company => container.appendChild(company));
+    }
+</script>
+
+</body>
+</html>
