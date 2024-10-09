@@ -19,6 +19,7 @@ def get_corp_ids():
 
 # 企業情報を取得する関数
 def get_company_info(corp_id):
+    # 企業ページのURLを生成
     url = f"https://job.mynavi.jp/25/pc/search/corp{corp_id}/employment.html"
     response = requests.get(url)
     response.encoding = response.apparent_encoding
@@ -35,14 +36,11 @@ def get_company_info(corp_id):
     # 各コースの情報を取得
     for tmp in soup.find_all(class_="courseRow"):
         try:
-            # split() で分割して、項目の数が足りない場合にはデフォルト値を使用
             parts = tmp.text.split()
-
-            # 4つの項目に満たない場合、残りをデフォルト値で補完
             a = parts[0] if len(parts) > 0 else "不明"
             s = parts[1] if len(parts) > 1 else "不明"
             d = parts[2] if len(parts) > 2 else "不明"
-            f = parts[3] if len(parts) > 3 else "諸手当なし"  # 諸手当がない場合
+            f = parts[3] if len(parts) > 3 else "諸手当なし"
 
             graduate.append(a)
             salary.append(s)
@@ -52,8 +50,10 @@ def get_company_info(corp_id):
         except Exception as e:
             print(f"データの処理中にエラーが発生しました: {e}")
 
+    # 企業のURLも一緒に返す
     return {
         "company": company,
+        "company_url": url,  # URLを追加
         "graduate": graduate,
         "salary": salary,
         "basic": basic,

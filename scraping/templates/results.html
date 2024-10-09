@@ -10,6 +10,9 @@
             background: linear-gradient(to bottom, #e0eafc, #cfdef3);
             margin: 0;
             padding: 0;
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
         }
 
         header {
@@ -22,8 +25,16 @@
         }
 
         main {
+            display: flex;
+            flex: 1;
+        }
+
+        /* 左カラムのスタイル */
+        .sidebar {
+            flex: 1;
             padding: 2em;
-            text-align: center;
+            overflow-y: auto;
+            background-color: #f9f9f9;
         }
 
         .company {
@@ -45,25 +56,28 @@
             margin-bottom: 0.5em;
         }
 
-        p {
-            margin: 0.5em 0;
-        }
-
-        .spacer {
-            margin-bottom: 1em; /* 諸手当の下にスペースを追加 */
-        }
-
-        a {
-            display: inline-block;
-            margin-top: 1em;
-            color: #007bff;
+        h2 a {
+            color: #333;
             text-decoration: none;
             transition: color 0.3s;
         }
 
-        a:hover {
-            color: #0056b3;
+        h2 a:hover {
+            color: #007bff;
             text-decoration: underline;
+        }
+
+        /* 右カラムのスタイル */
+        .iframe-container {
+            flex: 3;
+            background-color: white;
+            border-left: 1px solid #ddd;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         footer {
@@ -72,9 +86,6 @@
             background: linear-gradient(to right, #4facfe, #00f2fe);
             color: white;
             box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            bottom: 0;
-            width: 100%;
         }
     </style>
 </head>
@@ -85,40 +96,52 @@
 </header>
 
 <main>
-    <h1>企業情報結果</h1>
+    <!-- 左カラム -->
+    <div class="sidebar" id="result-container">
+        <h1>企業情報結果</h1>
+        <label for="sort">ソート順:</label>
+        <select id="sort" onchange="sortResults()">
+            <option value="company">会社名順</option>
+            <option value="salary">支給額順</option>
+            <option value="basic">基本月額順</option>
+        </select>
 
-    <label for="sort">ソート順:</label>
-    <select id="sort" onchange="sortResults()">
-        <option value="company">会社名順</option>
-        <option value="salary">支給額順</option>
-        <option value="basic">基本月額順</option>
-    </select>
-
-    <div id="result-container">
         {% for result in results %}
             <div class="company" data-company="{{ result['company'] }}" data-salary="{{ result['salary'][0] }}" data-basic="{{ result['basic'][0] }}">
-                <h2>{{ result['company'] }}</h2>
+                <h2>
+                    <a href="#" onclick="showPage('{{ result['company_url'] }}'); return false;">{{ result['company'] }}</a>
+                </h2>
                 {% for i in range(result['graduate']|length) %}
-                    <p><strong>卒業: </strong>{{ result['graduate'][i] }}</p>
+                    <p><strong>条件: </strong>{{ result['graduate'][i] }}</p>
                     <p><strong>支給額: </strong>{{ result['salary'][i] }}</p>
                     <p><strong>基本月額: </strong>{{ result['basic'][i] }}</p>
-                    <p class="spacer">
-                        <strong>諸手当: </strong>
-                        {{ result['allowance'][i] if result['allowance'][i] else "諸手当なし" }}
-                    </p>
+                    <p><strong>諸手当: </strong>{{ result['allowance'][i] if result['allowance'][i] else "諸手当なし" }}</p>
                 {% endfor %}
             </div>
         {% endfor %}
     </div>
 
-    <a href="/">戻る</a>
+    <!-- 右カラム -->
+    <div class="iframe-container">
+        <iframe id="iframe" src=""></iframe>
+    </div>
 </main>
-
+<script>
+    function showPage(url) {
+        const iframe = document.getElementById('iframe');
+        iframe.src = ''; // 一度 src を空にすることで、リセットが確実に
+        iframe.src = url; // 再度、目的の URL に設定して読み込み
+    }
+</script>
 <footer>
     &copy; 2024 Team 就活
 </footer>
 
 <script>
+    function showPage(url) {
+        document.getElementById('iframe').src = url;
+    }
+
     function sortResults() {
         const sortBy = document.getElementById('sort').value;
         const container = document.getElementById('result-container');
@@ -134,7 +157,6 @@
             }
         });
 
-        container.innerHTML = '';
         companies.forEach(company => container.appendChild(company));
     }
 </script>

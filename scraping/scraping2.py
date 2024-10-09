@@ -43,11 +43,11 @@ for tmp in soup.find_all(class_="courseRow"):
         allowance.append(f)
     except ValueError:
         print("データを分割できませんでした:", tmp.text)
-for i in range(4):
-    print(graduate[i])
-    print("支給額:" + salary[i])
-    print("基本月額:" + basic[i])
-    print("諸手当（一律）／月:" + allowance[i])
+# for i in range(4):
+#     print(graduate[1])
+#     print("支給額:" + salary[i])
+#     print("基本月額:" + basic[i])
+#     print("諸手当（一律）／月:" + allowance[i])
 
 
 # 結果をファイルに書き込む
