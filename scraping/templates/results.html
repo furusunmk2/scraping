@@ -87,6 +87,46 @@
             color: white;
             box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
         }
+
+        /* 吹き出しのスタイル */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: left;
+            border-radius: 5px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            top: 150%; /* 吹き出しが要素の下に表示されるように設定 */
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            bottom: 100%; /* 矢印が吹き出しの上側に表示されるように設定 */
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent #555 transparent;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -106,19 +146,26 @@
             <option value="basic">基本月額順</option>
         </select>
 
-        {% for result in results %}
-            <div class="company" data-company="{{ result['company'] }}" data-salary="{{ result['salary'][0] }}" data-basic="{{ result['basic'][0] }}">
-                <h2>
-                    <a href="#" onclick="showPage('{{ result['company_url'] }}'); return false;">{{ result['company'] }}</a>
-                </h2>
-                {% for i in range(result['graduate']|length) %}
-                    <p><strong>条件: </strong>{{ result['graduate'][i] }}</p>
-                    <p><strong>支給額: </strong>{{ result['salary'][i] }}</p>
-                    <p><strong>基本月額: </strong>{{ result['basic'][i] }}</p>
-                    <p><strong>諸手当: </strong>{{ result['allowance'][i] if result['allowance'][i] else "諸手当なし" }}</p>
-                {% endfor %}
+        <div id="result-container">
+            {% for result in results %}
+                <div class="company" data-company="{{ result['company'] }}" data-salary="{{ result['salary'][0] }}" data-basic="{{ result['basic'][0] }}">
+                    <h2>
+                        <a href="#" onclick="showPage('{{ result['company_url'] }}'); return false;">{{ result['company'] }}</a>
+                    </h2>
+                    {% for i in range(result['graduate']|length) %}
+                                <p><strong>条件: </strong>{{ result['graduate'][i] }}</p>
+                                <p class="tooltip">
+                                    <strong>支給額: </strong>{{ result['salary'][i] }}
+                                    <span class="tooltiptext">
+                                        <strong>基本月額: </strong>{{ result['basic'][i] }}<br>
+                                        <strong>諸手当: </strong>{{ result['allowance'][i] if result['allowance'][i] else "諸手当なし" }}
+                                    </span>
+                                </p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <a href="/">戻る</a>
             </div>
-        {% endfor %}
     </div>
 
     <!-- 右カラム -->
