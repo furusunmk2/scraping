@@ -127,6 +127,7 @@
             visibility: visible;
             opacity: 1;
         }
+
     </style>
 </head>
 <body>
@@ -153,40 +154,44 @@
                         <a href="#" onclick="showPage('{{ result['company_url'] }}'); return false;">{{ result['company'] }}</a>
                     </h2>
                     {% for i in range(result['graduate']|length) %}
-                                <p><strong>条件: </strong>{{ result['graduate'][i] }}</p>
-                                <p class="tooltip">
-                                    <strong>支給額: </strong>{{ result['salary'][i] }}
-                                    <span class="tooltiptext">
-                                        <strong>基本月額: </strong>{{ result['basic'][i] }}<br>
-                                        <strong>諸手当: </strong>{{ result['allowance'][i] if result['allowance'][i] else "諸手当なし" }}
-                                    </span>
-                                </p>
+                        <p><strong>条件: </strong>{{ result['graduate'][i] }}</p>
+                        <p class="tooltip">
+                            <strong>支給額: </strong>{{ result['salary'][i] }}
+                            <span class="tooltiptext">
+                                <strong>基本月額: </strong>{{ result['basic'][i] }}<br>
+                                <strong>諸手当: </strong>{{ result['allowance'][i] if result['allowance'][i] else "諸手当なし" }}
+                            </span>
+                        </p>
                     {% endfor %}
                 </div>
             {% endfor %}
             <a href="/">戻る</a>
-            </div>
+        </div>
     </div>
 
     <!-- 右カラム -->
-    <div class="iframe-container">
+    <div class="iframe-container" >
         <iframe id="iframe" src=""></iframe>
     </div>
 </main>
-<script>
-    function showPage(url) {
-        const iframe = document.getElementById('iframe');
-        iframe.src = ''; // 一度 src を空にすることで、リセットが確実に
-        iframe.src = url; // 再度、目的の URL に設定して読み込み
-    }
-</script>
-<footer>
-    &copy; 2024 Team 就活
-</footer>
 
 <script>
     function showPage(url) {
-        document.getElementById('iframe').src = url;
+        const iframe = document.getElementById('iframe');
+        const sidebarScrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        
+        // 目的の URL に設定して読み込み
+        iframe.src = url;
+
+        // iframeが読み込まれたときに、同じスクロール位置を設定
+        iframe.onload = function() {
+            const iframeContent = iframe.contentWindow || iframe.contentDocument;
+            if (iframeContent.document) iframeContent = iframeContent.document;
+            
+            // iframe内のスクロール位置をsidebarScrollTopに設定
+            iframeContent.document.documentElement.scrollTop = sidebarScrollTop;
+            iframeContent.document.body.scrollTop = sidebarScrollTop;
+        };
     }
 
     function sortResults() {
@@ -207,6 +212,10 @@
         companies.forEach(company => container.appendChild(company));
     }
 </script>
+
+<footer>
+    &copy; 2024 Team 就活
+</footer>
 
 </body>
 </html>
