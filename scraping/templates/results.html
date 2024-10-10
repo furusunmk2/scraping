@@ -27,13 +27,14 @@
         main {
             display: flex;
             flex: 1;
+            overflow: hidden; /* 親要素でのスクロールを防ぐ */
         }
 
         /* 左カラムのスタイル */
         .sidebar {
             flex: 1;
             padding: 2em;
-            overflow-y: auto;
+            overflow-y: auto; /* 独自のスクロールバー */
             background-color: #f9f9f9;
         }
 
@@ -72,12 +73,14 @@
             flex: 3;
             background-color: white;
             border-left: 1px solid #ddd;
+            
         }
 
         iframe {
             width: 100%;
-            height: 100%;
+            height: 100%; /* iframe自体が100%の高さを占める */
             border: none;
+            overflow: hidden; /* iframe内のスクロールを非表示 */
         }
 
         footer {
@@ -170,28 +173,14 @@
     </div>
 
     <!-- 右カラム -->
-    <div class="iframe-container" >
+    <div class="iframe-container">
         <iframe id="iframe" src=""></iframe>
     </div>
 </main>
 
 <script>
     function showPage(url) {
-        const iframe = document.getElementById('iframe');
-        const sidebarScrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-        
-        // 目的の URL に設定して読み込み
-        iframe.src = url;
-
-        // iframeが読み込まれたときに、同じスクロール位置を設定
-        iframe.onload = function() {
-            const iframeContent = iframe.contentWindow || iframe.contentDocument;
-            if (iframeContent.document) iframeContent = iframeContent.document;
-            
-            // iframe内のスクロール位置をsidebarScrollTopに設定
-            iframeContent.document.documentElement.scrollTop = sidebarScrollTop;
-            iframeContent.document.body.scrollTop = sidebarScrollTop;
-        };
+        document.getElementById('iframe').src = url;
     }
 
     function sortResults() {
