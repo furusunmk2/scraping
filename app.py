@@ -31,9 +31,13 @@ def get_company_info(corp_id):
     allowance = []
 
     company_mod = soup.find("title").text
+    
     company = company_mod.replace("の採用データ | マイナビ2025", "")
-
+    company = company.replace("の募集コース一覧 | マイナビ2025", "")
     # 各コースの情報を取得
+    
+    
+    
     for tmp in soup.find_all(class_="courseRow"):
         try:
             parts = tmp.text.split()
