@@ -66,3 +66,4 @@ output_file = "company_data.txt"
 # すべての企業IDについて情報を取得
 for corp_id in corp_ids:
     get_company_info(corp_id, output_file)
+###awasdasdasdasdadadsasds
