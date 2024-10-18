@@ -68,12 +68,20 @@
             text-decoration: underline;
         }
 
+        /* 条件と支給額の間のスタイル調整 */
+        .company p {
+            margin: 0.3em 0; /* 上下のマージンを少なくして距離を縮める */
+        }
+
+        .company p strong {
+            margin-right: 5px; /* ラベルと内容の間隔を調整 */
+        }
+
         /* 右カラムのスタイル */
         .iframe-container {
             flex: 3;
             background-color: white;
             border-left: 1px solid #ddd;
-            
         }
 
         iframe {
@@ -165,6 +173,7 @@
                                 <strong>諸手当: </strong>{{ result['allowance'][i] if result['allowance'][i] else "諸手当なし" }}
                             </span>
                         </p>
+                        <p>　</p>
                     {% endfor %}
                 </div>
             {% endfor %}

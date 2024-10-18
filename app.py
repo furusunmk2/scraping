@@ -31,28 +31,67 @@ def get_company_info(corp_id):
     allowance = []
 
     company_mod = soup.find("title").text
-    
     company = company_mod.replace("の採用データ | マイナビ2025", "")
     company = company.replace("の募集コース一覧 | マイナビ2025", "")
+    
     # 各コースの情報を取得
-    
-    
-    
-    for tmp in soup.find_all(class_="courseRow"):
-        try:
-            parts = tmp.text.split()
-            a = parts[0] if len(parts) > 0 else "不明"
-            s = parts[1] if len(parts) > 1 else "不明"
-            d = parts[2] if len(parts) > 2 else "不明"
-            f = parts[3] if len(parts) > 3 else "諸手当なし"
+    if not soup.find_all(class_="courseRow"):
+        url_corp_list2 = f"https://job.mynavi.jp/25/pc/search/corp{corp_id}/employment.html"
+        response_corp_list2 = requests.get(url_corp_list2)
+        response_corp_list2.encoding = response_corp_list2.apparent_encoding
+        soup_corp_list = BeautifulSoup(response_corp_list2.content, "html.parser")
+       
+        # viewDataListのリンクを取得
+        corp_ids2 = []
+        for info in soup_corp_list.find_all("a", id=lambda x: x and "viewDataList" in x):
+            href = info["href"]
+            full_url = f"https://job.mynavi.jp{href}"  # hrefが部分パスの可能性があるため、フルURLを構成
+            corp_ids2.append(full_url)
+        
+        # corp_ids2リストのURLからデータを取得
+        for url_corp_list3 in corp_ids2:
+            response = requests.get(url_corp_list3)
+            response.encoding = response.apparent_encoding
+            soup = BeautifulSoup(response.content, "html.parser")
 
-            graduate.append(a)
-            salary.append(s)
-            basic.append(d)
-            allowance.append(f)
+            for tmp in soup.find_all(class_="courseRow"):
+                try:
+                    # corseName の要素が存在するか確認
+                    corse_name_tag = tmp.find(class_='courseName')
+                    corse_name = corse_name_tag.find('p').text.strip() if corse_name_tag and corse_name_tag.find('p') else "不明"
 
-        except Exception as e:
-            print(f"データの処理中にエラーが発生しました: {e}")
+                    # corseData の要素が存在するか確認
+                    corse_data_tags = tmp.find_all(class_='courseData')
+                    s = corse_data_tags[0].find('p').text.strip() if len(corse_data_tags) > 0 and corse_data_tags[0].find('p') else "不明"
+                    d = corse_data_tags[1].find('p').text.strip() if len(corse_data_tags) > 1 and corse_data_tags[1].find('p') else "不明"
+                    f = corse_data_tags[2].find('p').text.strip() if len(corse_data_tags) > 2 and corse_data_tags[2].find('p') else "諸手当なし"
+
+                    graduate.append(corse_name)
+                    salary.append(s)
+                    basic.append(d)
+                    allowance.append(f)
+                except Exception as e:
+                    print(f"データの処理中にエラーが発生しました2: {e}")
+                
+    else:
+        for tmp in soup.find_all(class_="courseRow"):
+            try:
+                # corseName の要素が存在するか確認
+                corse_name_tag = tmp.find(class_='courseName')
+                corse_name = corse_name_tag.find('p').text.strip() if corse_name_tag and corse_name_tag.find('p') else "不明"
+
+                # corseData の要素が存在するか確認
+                corse_data_tags = tmp.find_all(class_='courseData')
+                s = corse_data_tags[0].find('p').text.strip() if len(corse_data_tags) > 0 and corse_data_tags[0].find('p') else "不明"
+                d = corse_data_tags[1].find('p').text.strip() if len(corse_data_tags) > 1 and corse_data_tags[1].find('p') else "不明"
+                f = corse_data_tags[2].find('p').text.strip() if len(corse_data_tags) > 2 and corse_data_tags[2].find('p') else "諸手当なし"
+
+                graduate.append(corse_name)
+                salary.append(s)
+                basic.append(d)
+                allowance.append(f)
+            except Exception as e:
+                print(f"データの処理中にエラーが発生しました1: {e}")
 
     # 企業のURLも一緒に返す
     return {
@@ -78,6 +117,3 @@ def scrape():
 
 if __name__ == '__main__':
     app.run(debug=True)
-    
-    
-    
