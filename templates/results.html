@@ -52,20 +52,8 @@
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
         }
 
-        h2 {
-            color: #333;
-            margin-bottom: 0.5em;
-        }
-
-        h2 a {
-            color: #333;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        h2 a:hover {
-            color: #007bff;
-            text-decoration: underline;
+        .hidden {
+            display: none;  /* display: none; に変更してスペースを詰める */
         }
 
         /* 条件と支給額の間のスタイル調整 */
@@ -75,6 +63,11 @@
 
         .company p strong {
             margin-right: 5px; /* ラベルと内容の間隔を調整 */
+        }
+
+        /* 不要な空白行を削除 */
+        .company .course-section:last-child {
+            margin-bottom: 0;
         }
 
         /* 右カラムのスタイル */
@@ -147,11 +140,25 @@
     Team 就活 - スクレイピング結果
 </header>
 
+<!-- フィルタのチェックボックスを追加 -->
+<div>
+    <label><input type="checkbox" class="filter" value="s2">専門(2年)</label>
+    <label><input type="checkbox" class="filter" value="s3">専門(3年)</label>
+    <label><input type="checkbox" class="filter" value="s4">専門(4年)</label>
+    <label><input type="checkbox" class="filter" value="s5">高専</label>
+    <label><input type="checkbox" class="filter" value="td">短大</label>
+    <label><input type="checkbox" class="filter" value="4d">大学(4年制)</label>
+    <label><input type="checkbox" class="filter" value="6d">大学(6年制)</label>
+    <label><input type="checkbox" class="filter" value="sh">修士</label>
+    <label><input type="checkbox" class="filter" value="ha">博士</label>
+    <label><input type="checkbox" class="filter" value="bu">文系</label>
+    <label><input type="checkbox" class="filter" value="ri">理系</label>
+    <button onclick="filterByClass()">適用</button>
+</div>
 <main>
     <!-- 左カラム -->
     <div class="sidebar" id="result-container">
         <h1>企業情報結果</h1>
-        <label for="sort">ソート順:</label>
         <select id="sort" onchange="sortResults()">
             <option value="company">会社名順</option>
             <option value="salary">支給額順</option>
@@ -160,20 +167,22 @@
 
         <div id="result-container">
             {% for result in results %}
-                <div class="company" data-company="{{ result['company'] }}" data-salary="{{ result['salary'][0] }}" data-basic="{{ result['basic'][0] }}">
+                <div class="company">
                     <h2>
                         <a href="#" onclick="showPage('{{ result['company_url'] }}'); return false;">{{ result['company'] }}</a>
                     </h2>
                     {% for i in range(result['graduate']|length) %}
-                        <p><strong>条件: </strong>{{ result['graduate'][i] }}</p>
-                        <p class="tooltip">
-                            <strong>支給額: </strong>{{ result['salary'][i] }}
-                            <span class="tooltiptext">
-                                <strong>基本月額: </strong>{{ result['basic'][i] }}<br>
-                                <strong>諸手当: </strong>{{ result['allowance'][i] if result['allowance'][i] else "諸手当なし" }}
-                            </span>
-                        </p>
-                        <p>　</p>
+                        <div class="course-section {{ result['class_tag_list'][i] }}">
+                            <p><strong>条件: </strong>{{ result['graduate'][i] }}</p>
+
+                            <p class="tooltip">
+                                <strong>支給額: </strong>{{ result['salary'][i] }}
+                                <span class="tooltiptext">
+                                    <strong>基本月額: </strong>{{ result['basic'][i] }}<br>
+                                    <strong>諸手当: </strong>{{ result['allowance'][i] if result['allowance'][i] else "諸手当なし" }}
+                                </span>
+                            </p>
+                        </div>
                     {% endfor %}
                 </div>
             {% endfor %}
@@ -208,6 +217,58 @@
         });
 
         companies.forEach(company => container.appendChild(company));
+    }
+
+    // チェックボックスの状態に基づいてクラスごとにフィルタリング
+    function filterByClass() {
+        const checkboxes = document.querySelectorAll('.filter');
+        const checkedClasses = Array.from(checkboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
+
+        const companies = document.querySelectorAll('.company');
+
+        // チェックが全くされていない場合、全て表示
+        if (checkedClasses.length === 0) {
+            companies.forEach(company => {
+                const sections = company.querySelectorAll('.course-section');
+                sections.forEach(section => {
+                    section.classList.remove('hidden');
+                });
+                company.classList.remove('hidden');
+            });
+            return;
+        }
+
+        companies.forEach(company => {
+            const sections = company.querySelectorAll('.course-section');
+            let hasVisibleSection = false;
+
+            sections.forEach(section => {
+                // all クラスを持つ要素は常に表示
+                if (section.classList.contains('all')) {
+                    section.classList.remove('hidden');
+                    hasVisibleSection = true;
+                    return; // この要素はスキップ
+                }
+
+                // どれか一つのチェックされたクラスが要素に含まれる場合は表示、それ以外は非表示
+                const shouldShow = checkedClasses.some(cls => section.classList.contains(cls));
+                if (shouldShow) {
+                    section.classList.remove('hidden');
+                    hasVisibleSection = true; // 表示されるセクションが1つでもあればTrueに
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
+
+            // もしその company 内の course-section がすべて非表示なら company も非表示
+            if (!hasVisibleSection) {
+                company.classList.add('hidden');
+            } else {
+                company.classList.remove('hidden');
+            }
+        });
     }
 </script>
 

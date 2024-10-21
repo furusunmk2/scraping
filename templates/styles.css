@@ -1,0 +1,22 @@
+if  re.match('専門', corse_name):
+if not re.match("３"|'４'|"3"|"4"|"三"|"四", corse_name):
+    id_tag_p += 1
+elif re.match("３"|"3"|"三", corse_name):
+    id_tag_p += 100
+elif re.match("４"|"4"|"四", corse_name):
+    id_tag_p += 100        
+if  re.match('短', corse_name):
+id_tag_p += 10
+if  re.match('大'|"学士", corse_name):
+if not re.match("短"|'院'|"専門", corse_name):
+    id_tag_p += 10000
+if  re.match('院'|"修士", corse_name): 
+id_tag_p += 100000
+if  re.match("博士", corse_name): 
+id_tag_p += 1000000
+if  re.match("文系", corse_name): 
+id_tag_p += 10000000
+elif  re.match("理系", corse_name): 
+id_tag_p += 20000000       
+id_tag.append(id_tag_p)
+    

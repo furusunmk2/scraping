@@ -1,7 +1,8 @@
+# app.py
 from flask import Flask, render_template, request
 import requests
 from bs4 import BeautifulSoup
-
+import re
 app = Flask(__name__)
 
 # 企業IDリストを取得する関数
@@ -29,7 +30,8 @@ def get_company_info(corp_id):
     salary = []
     basic = []
     allowance = []
-
+    class_tag_list = []
+    
     company_mod = soup.find("title").text
     company = company_mod.replace("の採用データ | マイナビ2025", "")
     company = company.replace("の募集コース一覧 | マイナビ2025", "")
@@ -56,6 +58,42 @@ def get_company_info(corp_id):
 
             for tmp in soup.find_all(class_="courseRow"):
                 try:
+                    class_tag = ""
+                    # corseName の要素が存在するか確認
+                    corse_name_tag = tmp.find(class_='courseName')
+                    corse_name = corse_name_tag.find('p').text.strip() if corse_name_tag and corse_name_tag.find('p') else "不明"
+
+                    # 学歴のチェック
+                    if re.search(r'専門', corse_name):
+                        if not re.search(r"[34３４三四]", corse_name):  # 3, 4 などの条件
+                            class_tag += " s2"
+                        elif re.search(r"[3３三]", corse_name):
+                            class_tag += " s3"
+                        elif re.search(r"[4４四]", corse_name):
+                            class_tag += " s4"
+                    if re.search(r'高専|高度', corse_name):
+                        class_tag += " s5"        
+                    if re.search(r'短', corse_name):
+                        class_tag += " td"
+                    if re.search(r'大|学士', corse_name):
+                        if not re.search(r'短|院|専門', corse_name):
+                            if re.search(r'[6６六]', corse_name):
+                                class_tag += " 6d"
+                            else:
+                                class_tag += " 4d"
+                    if re.search(r'修士', corse_name):
+                        class_tag += " sh"   
+                    if re.search(r'博士', corse_name):
+                        class_tag += " ha"
+                    elif re.search(r'院', corse_name):
+                        class_tag += " sh ha"   
+                    if re.search(r'文系', corse_name):
+                        class_tag += " bu"
+                    elif re.search(r'理系', corse_name):
+                        class_tag += " ri"
+                    if class_tag == "":
+                         class_tag += " all"  # 修正: "all" をクォーテーションで囲む
+
                     # corseName の要素が存在するか確認
                     corse_name_tag = tmp.find(class_='courseName')
                     corse_name = corse_name_tag.find('p').text.strip() if corse_name_tag and corse_name_tag.find('p') else "不明"
@@ -70,15 +108,51 @@ def get_company_info(corp_id):
                     salary.append(s)
                     basic.append(d)
                     allowance.append(f)
+                    class_tag_list.append(class_tag)
                 except Exception as e:
                     print(f"データの処理中にエラーが発生しました2: {e}")
                 
     else:
-        for tmp in soup.find_all(class_="courseRow"):
+        for i,tmp in enumerate(soup.find_all(class_="courseRow")):
             try:
+                class_tag = ""
                 # corseName の要素が存在するか確認
                 corse_name_tag = tmp.find(class_='courseName')
                 corse_name = corse_name_tag.find('p').text.strip() if corse_name_tag and corse_name_tag.find('p') else "不明"
+
+                # 学歴のチェック
+                if re.search(r'専門', corse_name):
+                    if not re.search(r"[34３４三四]", corse_name):  # 3, 4 などの条件
+                        class_tag += " s2"
+                    elif re.search(r"[3３三]", corse_name):
+                        class_tag += " s3"
+                    elif re.search(r"[4４四]", corse_name):
+                        class_tag += " s4"
+                if re.search(r'高専|高度', corse_name):
+                    class_tag += " s5"        
+                if re.search(r'短', corse_name):
+                    class_tag += " td"
+                if re.search(r'大|学士', corse_name):
+                    if not re.search(r'短|院|専門', corse_name):
+                        if re.search(r'[6６六]', corse_name):
+                            class_tag += " 6d"
+                        else:
+                            class_tag += " 4d"
+                if re.search(r'修士', corse_name):
+                    class_tag += " sh"   
+                if re.search(r'博士', corse_name):
+                    class_tag += " ha"
+                elif re.search(r'院', corse_name):
+                    class_tag += " sh ha"   
+                if re.search(r'文系', corse_name):
+                    class_tag += " bu"
+                elif re.search(r'理系', corse_name):
+                    class_tag += " ri"
+                if class_tag == "":
+                    class_tag += " all"  # 修正: "all" をクォーテーションで囲む
+
+# s2,s3,s4,s5,td,4d,6d,sh,ha,bu,ri
+
 
                 # corseData の要素が存在するか確認
                 corse_data_tags = tmp.find_all(class_='courseData')
@@ -90,6 +164,7 @@ def get_company_info(corp_id):
                 salary.append(s)
                 basic.append(d)
                 allowance.append(f)
+                class_tag_list.append(class_tag)
             except Exception as e:
                 print(f"データの処理中にエラーが発生しました1: {e}")
 
@@ -100,7 +175,8 @@ def get_company_info(corp_id):
         "graduate": graduate,
         "salary": salary,
         "basic": basic,
-        "allowance": allowance
+        "allowance": allowance,
+        "class_tag_list" : class_tag_list
     }
 
 @app.route('/')
